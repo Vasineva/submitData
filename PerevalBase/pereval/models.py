@@ -21,15 +21,7 @@
 from django.db import models
 from django.utils import timezone
 
-# Уровни сложности по сезонам
-LEVEL_CHOICES = [
-    ('1A', '1A'),
-    ('1B', '1B'),
-    ('2A', '2A'),
-    ('2B', '2B'),
-    ('3A', '3A'),
-    ('3B', '3B'),  # можно добавить или заменить
-]
+
 
 # Статус модерации
 STATUS_CHOICES = [
