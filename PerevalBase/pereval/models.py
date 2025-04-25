@@ -1,9 +1,9 @@
 """
 Модели для REST API проекта ФСТР (Федерация спортивного туризма России).
 
-1. User — модель пользователя. Идентификация осуществляется по уникальному email.
+1. PerevalUser — модель пользователя. Идентификация осуществляется по уникальному email.
    Содержит ФИО и номер телефона.
-2. PerevaCoords — модель координат перевала. Содержит широту, долготу и высоту.
+2. PerevalCoords — модель координат перевала. Содержит широту, долготу и высоту.
 3. PerevalImage — модель изображения перевала. Хранит заголовок и URL изображения,
    связана с перевалом.
 4. PerevalAdded — основная модель для хранения информации о перевале:
@@ -21,8 +21,26 @@
 from django.db import models
 from django.utils import timezone
 
+# Уровни сложности по сезонам
+LEVEL_CHOICES = [
+    ('1A', '1A'),
+    ('1B', '1B'),
+    ('2A', '2A'),
+    ('2B', '2B'),
+    ('3A', '3A'),
+    ('3B', '3B'),  # можно добавить или заменить
+]
 
-class User(models.Model):
+# Статус модерации
+STATUS_CHOICES = [
+    ('new', 'Новая'),
+    ('pending', 'На модерации'),
+    ('accepted', 'Принята'),
+    ('rejected', 'Отклонена'),
+]
+
+
+class PerevalUser(models.Model):
     email = models.EmailField(primary_key=True)
     fam = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
@@ -33,7 +51,7 @@ class User(models.Model):
         return f"{self.fam} {self.name} ({self.email})"
 
 
-class PerevaCoords(models.Model):
+class PerevalCoords(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     height = models.IntegerField()
@@ -50,39 +68,20 @@ class PerevalImage(models.Model):
         return f"{self.title} - {self.image_url}"
 
 class PerevalAdded(models.Model):
-    beauty_title = models.CharField(max_length=100)  # Например, "пер. "
-    title = models.CharField(max_length=100)         # Название: "Пхия"
+    beauty_title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
     other_titles = models.CharField(max_length=255, blank=True)
     connect = models.TextField(blank=True)
-
     add_time = models.DateTimeField(default=timezone.now)
-
-    # Связи
-    user = models.ForeignKey(User, on_delete=models.CASCADE, to_field='email', related_name='perevals')
-    coords = models.OneToOneField(PerevaCoords, on_delete=models.CASCADE, related_name='pereval')
-
-    # Уровни сложности по сезонам
-    LEVEL_CHOICES = [
-        ('1A', '1A'),
-        ('1B', '1B'),
-        ('2A', '2A'),
-        ('2B', '2B'),
-        ('3A', '3A'),
-        ('3B', '3B'), # можно добавить или заменить
-    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='new')
     level_winter = models.CharField(max_length=3, choices=LEVEL_CHOICES, blank=True)
     level_summer = models.CharField(max_length=3, choices=LEVEL_CHOICES, blank=True)
     level_autumn = models.CharField(max_length=3, choices=LEVEL_CHOICES, blank=True)
     level_spring = models.CharField(max_length=3, choices=LEVEL_CHOICES, blank=True)
 
-    # Статус модерации
-    STATUS_CHOICES = [
-        ('new', 'Новая'),
-        ('pending', 'На модерации'),
-        ('accepted', 'Принята'),
-        ('rejected', 'Отклонена'),
-    ]
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='new')
+    # Связи
+    user = models.ForeignKey(PerevalUser, on_delete=models.CASCADE, to_field='email', related_name='perevals')
+    coords = models.OneToOneField(PerevalCoords, on_delete=models.CASCADE, related_name='pereval')
 
     def __str__(self):
         return f"{self.beauty_title} {self.title} ({self.add_time.strftime('%Y-%m-%d')})"
