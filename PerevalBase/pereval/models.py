@@ -59,14 +59,6 @@ class PerevalCoords(models.Model):
     def __str__(self):
         return f"Широта: {self.latitude}, Долгота: {self.longitude}, Высота: {self.height}"
 
-class PerevalImage(models.Model):
-    pereval = models.ForeignKey('PerevalAdded', on_delete=models.CASCADE, related_name='images')
-    title = models.CharField(max_length=100)
-    image_url = models.URLField()  # хранится ссылка на изображение
-
-    def __str__(self):
-        return f"{self.title} - {self.image_url}"
-
 class PerevalAdded(models.Model):
     beauty_title = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
@@ -85,3 +77,11 @@ class PerevalAdded(models.Model):
 
     def __str__(self):
         return f"{self.beauty_title} {self.title} ({self.add_time.strftime('%Y-%m-%d')})"
+
+class PerevalImage(models.Model):
+    pereval = models.ForeignKey('PerevalAdded', on_delete=models.CASCADE, related_name='images')
+    title = models.CharField(max_length=100)
+    image_url = models.URLField()  # хранится ссылка на изображение
+
+    def __str__(self):
+        return f"{self.title} - {self.image_url}"
