@@ -22,16 +22,6 @@ from django.db import models
 from django.utils import timezone
 
 
-
-# Статус модерации
-STATUS_CHOICES = [
-    ('new', 'Новая'),
-    ('pending', 'На модерации'),
-    ('accepted', 'Принята'),
-    ('rejected', 'Отклонена'),
-]
-
-
 class PerevalUser(models.Model):
     email = models.EmailField(primary_key=True)
     fam = models.CharField(max_length=100)
@@ -57,11 +47,20 @@ class PerevalAdded(models.Model):
     other_titles = models.CharField(max_length=255, blank=True)
     connect = models.TextField(blank=True)
     add_time = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='new')
     level_winter = models.CharField(max_length=3, blank=True)
     level_summer = models.CharField(max_length=3, blank=True)
     level_autumn = models.CharField(max_length=3, blank=True)
     level_spring = models.CharField(max_length=3, blank=True)
+
+    # Статус модерации
+    STATUS_CHOICES = [
+        ('new', 'Новая'),
+        ('pending', 'На модерации'),
+        ('accepted', 'Принята'),
+        ('rejected', 'Отклонена'),
+    ]
+
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='new')
 
     # Связи
     user = models.ForeignKey(PerevalUser, on_delete=models.CASCADE, to_field='email', related_name='perevals')

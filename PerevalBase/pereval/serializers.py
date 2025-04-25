@@ -1,3 +1,9 @@
+"""
+Сериализаторы преобразуют данные моделей PerevalUser, PerevalCoords,
+PerevalImage и PerevalAdded в формат, удобный для API. Сериализаторы обрабатывают
+всю необходимую информацию, включая данные пользователя, координаты перевала и изображения.
+"""
+
 from .models import *
 from rest_framework import serializers
 
@@ -15,7 +21,7 @@ class PerevalCoordsSerializer(serializers.ModelSerializer):
 class PerevalImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PerevalImage
-        fields = ['title', 'image_url']
+        fields = ['title', 'image_url'] # # Здесь image_url будет хранить ссылку на изображения
 
 
 class PerevalAddedSerializer(serializers.ModelSerializer):
