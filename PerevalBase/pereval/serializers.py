@@ -13,22 +13,38 @@ class PerevalCoordsSerializer(serializers.ModelSerializer):
        fields = '__all__'
 
 class PerevalImageSerializer(serializers.ModelSerializer):
-   class Meta:
-       class Meta:
-           model = PerevalImage
-           fields = ['title', 'image_url']
+    class Meta:
+        model = PerevalImage
+        fields = ['id', 'title', 'image_url', 'pereval']
+
 
 class PerevalAddedSerializer(serializers.ModelSerializer):
-   class Meta:
-       user = PerevalUserSerializer()
-       coords = PerevalCoordsSerializer()
-       images = PerevalImageSerializer(many=True, write_only=True) #many=True список изображений
-       # Уровни сложности по сезонам передаются как словарь
-       level = serializers.DictField(child=serializers.CharField(), write_only=True)
+    coords = PerevalCoordsSerializer()
+    level_winter = serializers.CharField(max_length=3, required=False, allow_blank=True)
+    level_summer = serializers.CharField(max_length=3, required=False, allow_blank=True)
+    level_autumn = serializers.CharField(max_length=3, required=False, allow_blank=True)
+    level_spring = serializers.CharField(max_length=3, required=False, allow_blank=True)
+    user_email = serializers.EmailField(write_only=True)
+    user = serializers.HiddenField(default=None)
 
-       class Meta:
-           model = PerevalAdded
-           fields = [
-               'beauty_title', 'title', 'other_titles', 'connect', 'add_time',
-               'user', 'coords', 'level', 'images'
-           ]  # Поля, которые участвуют в сериализации
+    class Meta:
+        model = PerevalAdded
+        exclude = []
+
+    def create(self, validated_data):
+        email = validated_data.pop('user_email')
+        try:
+            user = PerevalUser.objects.get(email=email)
+        except PerevalUser.DoesNotExist:
+            raise serializers.ValidationError("Пользователь с таким email не зарегистрирован.")
+
+        coords_data = validated_data.pop('coords')
+        coords = PerevalCoords.objects.create(**coords_data)
+
+        validated_data['user'] = user
+        validated_data['coords'] = coords
+        return PerevalAdded.objects.create(**validated_data)
+
+
+
+
