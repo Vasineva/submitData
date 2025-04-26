@@ -38,6 +38,27 @@ class PerevalAddedSerializer(serializers.ModelSerializer):
             'images'
         ]
 
+    def create(self, validated_data):
+        # Извлекаем вложенные данные
+        user_data = validated_data.pop('user')
+        coords_data = validated_data.pop('coords')
+        images_data = validated_data.pop('images')
+
+        # Находим существующего пользователя или используем его
+        user = PerevalUser.objects.get(email=user_data['email'])
+
+        # Создаем координаты
+        coords = PerevalCoords.objects.create(**coords_data)
+
+        # Создаем сам перевал
+        pereval = PerevalAdded.objects.create(user=user, coords=coords, **validated_data)
+
+        # Создаем изображения и связываем их с перевалом
+        for image_data in images_data:
+            PerevalImage.objects.create(pereval=pereval, **image_data)
+
+        return pereval
+
 
 
 
