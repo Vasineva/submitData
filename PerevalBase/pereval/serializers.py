@@ -9,9 +9,22 @@ from rest_framework import serializers
 
 
 class PerevalUserSerializer(serializers.ModelSerializer):
-   class Meta:
-       model = PerevalUser
-       fields = '__all__'
+    class Meta:
+        model = PerevalUser
+        fields = ['email', 'fam', 'name', 'otc', 'phone']
+
+    def create(self, validated_data):
+        # Пытаемся найти пользователя по email
+        user, created = PerevalUser.objects.get_or_create(
+            email=validated_data['email'],
+            defaults={
+                'fam': validated_data.get('fam', ''),
+                'name': validated_data.get('name', ''),
+                'otc': validated_data.get('otc', ''),
+                'phone': validated_data.get('phone', ''),
+            }
+        )
+        return user
 
 class PerevalCoordsSerializer(serializers.ModelSerializer):
    class Meta:
@@ -44,8 +57,10 @@ class PerevalAddedSerializer(serializers.ModelSerializer):
         coords_data = validated_data.pop('coords')
         images_data = validated_data.pop('images')
 
-        # Находим существующего пользователя или используем его
-        user = PerevalUser.objects.get(email=user_data['email'])
+        # # Создаём или находим пользователя
+        user_serializer = PerevalUserSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
 
         # Создаем координаты
         coords = PerevalCoords.objects.create(**coords_data)

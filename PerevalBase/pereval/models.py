@@ -23,7 +23,7 @@ from django.utils import timezone
 
 
 class PerevalUser(models.Model):
-    email = models.EmailField(primary_key=True)
+    email = models.EmailField()
     fam = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     otc = models.CharField(max_length=100, blank=True) # у пользователя может не быть отчества
@@ -63,7 +63,7 @@ class PerevalAdded(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='new')
 
     # Связи
-    user = models.ForeignKey(PerevalUser, on_delete=models.CASCADE, to_field='email', related_name='perevals')
+    user = models.ForeignKey(PerevalUser, on_delete=models.CASCADE, related_name='perevals')
     coords = models.OneToOneField(PerevalCoords, on_delete=models.CASCADE, related_name='pereval')
 
     def __str__(self):
