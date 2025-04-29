@@ -74,6 +74,9 @@ class PerevalAddedSerializer(serializers.ModelSerializer):
 
         return pereval
 
+class Pereval_InfoSerializer(serializers.ModelSerializer):
+    pass
+
 
 
 
