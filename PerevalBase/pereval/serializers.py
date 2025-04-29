@@ -88,6 +88,9 @@ class PerevalInfoSerializer(serializers.ModelSerializer):
             'images'
         ]
 
+class PerevalUpdateSerializer(serializers.ModelSerializer):
+    pass
+
 
 
 
