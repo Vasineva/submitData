@@ -88,8 +88,22 @@ class PerevalInfoSerializer(serializers.ModelSerializer):
             'images'
         ]
 
+class CoordsUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PerevalCoords
+        fields = ['latitude', 'longitude', 'height']
+
 class PerevalUpdateSerializer(serializers.ModelSerializer):
-    pass
+    coords = CoordsUpdateSerializer()
+    images = PerevalImageSerializer(many=True)
+
+    class Meta:
+        model = PerevalAdded
+        fields = [
+            'beauty_title', 'title', 'other_titles', 'connect', 'add_time',
+            'level_winter', 'level_summer', 'level_autumn', 'level_spring',
+            'status', 'coords', 'images'
+        ]
 
 
 
