@@ -2,7 +2,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import PerevalAddedSerializer
+from .serializers import PerevalAddedSerializer, PerevalInfoSerializer
+from .models import PerevalAdded
+from django.shortcuts import get_object_or_404
 
 
 class SubmitData(APIView):
@@ -36,3 +38,9 @@ class SubmitData(APIView):
             'errors': serializer.errors,
             'id': None
         }, status=status.HTTP_400_BAD_REQUEST)
+
+class PerevalDetail(APIView):
+    def get(self, request, id):
+        pereval = get_object_or_404(PerevalAdded, id=id)
+        serializer = PerevalInfoSerializer(pereval)
+        return Response(serializer.data, status=status.HTTP_200_OK)

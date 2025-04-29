@@ -74,7 +74,7 @@ class PerevalAddedSerializer(serializers.ModelSerializer):
 
         return pereval
 
-class Pereval_InfoSerializer(serializers.ModelSerializer):
+class PerevalInfoSerializer(serializers.ModelSerializer):
     user = PerevalUserSerializer()
     coords = PerevalCoordsSerializer()
     images = PerevalImageSerializer(many=True)
