@@ -105,6 +105,19 @@ class PerevalUpdateSerializer(serializers.ModelSerializer):
             'status', 'coords', 'images'
         ]
 
+    def update(self, instance, validated_data):
+        if instance.status != 'new':
+            raise serializers.ValidationError("Могут быть обновлены только записи со статусом 'new'.")
 
+        instance.beauty_title = validated_data.get('beauty_title', instance.beauty_title)
+        instance.title = validated_data.get('title', instance.title)
+        instance.other_titles = validated_data.get('other_titles', instance.other_titles)
+        instance.connect = validated_data.get('connect', instance.connect)
+        instance.add_time = validated_data.get('add_time', instance.add_time)
+        instance.level_winter = validated_data.get('level_winter', instance.level_winter)
+        instance.level_summer = validated_data.get('level_summer', instance.level_summer)
+        instance.level_autumn = validated_data.get('level_autumn', instance.level_autumn)
+        instance.level_spring = validated_data.get('level_spring', instance.level_spring)
 
-
+        instance.save()
+        return instance
