@@ -106,9 +106,15 @@ class PerevalUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def update(self, instance, validated_data):
+        # отредактировать существующую запись, если она в статусе new
         if instance.status != 'new':
             raise serializers.ValidationError("Могут быть обновлены только записи со статусом 'new'.")
 
+        # Извлекаем вложенные данные
+        coords_data = validated_data.pop('coords', None)
+        images_data = validated_data.pop('images', None)
+
+        # Обновление простых полей
         instance.beauty_title = validated_data.get('beauty_title', instance.beauty_title)
         instance.title = validated_data.get('title', instance.title)
         instance.other_titles = validated_data.get('other_titles', instance.other_titles)
@@ -118,6 +124,18 @@ class PerevalUpdateSerializer(serializers.ModelSerializer):
         instance.level_summer = validated_data.get('level_summer', instance.level_summer)
         instance.level_autumn = validated_data.get('level_autumn', instance.level_autumn)
         instance.level_spring = validated_data.get('level_spring', instance.level_spring)
-
         instance.save()
+
+        # Обновление координат
+        if coords_data:
+            coords_serializer = CoordsUpdateSerializer(instance.coords, data=coords_data, partial=True)
+            if coords_serializer.is_valid(raise_exception=True):
+                coords_serializer.save()
+
+        # Обновление изображений: удалить старые и добавить новые
+        if images_data:
+            instance.images.all().delete()
+            for img in images_data:
+                PerevalImage.objects.create(pereval=instance, **img)
+
         return instance
