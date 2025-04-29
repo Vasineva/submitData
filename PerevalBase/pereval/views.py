@@ -2,7 +2,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import PerevalAddedSerializer, PerevalInfoSerializer
+from .serializers import PerevalAddedSerializer, PerevalInfoSerializer, PerevalUpdateSerializer
 from .models import PerevalAdded
 from django.shortcuts import get_object_or_404
 
@@ -39,8 +39,23 @@ class SubmitData(APIView):
             'id': None
         }, status=status.HTTP_400_BAD_REQUEST)
 
-class PerevalDetail(APIView):
+class PerevalRetrieveUpdateView(APIView):
     def get(self, request, id):
         pereval = get_object_or_404(PerevalAdded, id=id)
         serializer = PerevalInfoSerializer(pereval)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, id):
+        pereval = get_object_or_404(PerevalAdded, id=id)
+
+        if pereval.status != 'new':
+            return Response({
+                'state': 0,
+                'message': 'Запись не может быть отредактирована, так как ее статус не "new".'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = PerevalUpdateSerializer(pereval, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'state': 1}, status=status.HTTP_200_OK)
+        return Response({'state': 0, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

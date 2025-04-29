@@ -88,13 +88,13 @@ class PerevalInfoSerializer(serializers.ModelSerializer):
             'images'
         ]
 
-class CoordsUpdateSerializer(serializers.ModelSerializer):
+class PerevalCoordsUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PerevalCoords
         fields = ['latitude', 'longitude', 'height']
 
 class PerevalUpdateSerializer(serializers.ModelSerializer):
-    coords = CoordsUpdateSerializer()
+    coords = PerevalCoordsUpdateSerializer()
     images = PerevalImageSerializer(many=True)
 
     class Meta:
@@ -106,10 +106,6 @@ class PerevalUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def update(self, instance, validated_data):
-        # отредактировать существующую запись, если она в статусе new
-        if instance.status != 'new':
-            raise serializers.ValidationError("Могут быть обновлены только записи со статусом 'new'.")
-
         # Извлекаем вложенные данные
         coords_data = validated_data.pop('coords', None)
         images_data = validated_data.pop('images', None)
@@ -128,7 +124,7 @@ class PerevalUpdateSerializer(serializers.ModelSerializer):
 
         # Обновление координат
         if coords_data:
-            coords_serializer = CoordsUpdateSerializer(instance.coords, data=coords_data, partial=True)
+            coords_serializer = PerevalCoordsUpdateSerializer(instance.coords, data=coords_data, partial=True)
             if coords_serializer.is_valid(raise_exception=True):
                 coords_serializer.save()
 
