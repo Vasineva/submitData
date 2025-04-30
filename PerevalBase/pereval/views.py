@@ -8,8 +8,12 @@ from django.shortcuts import get_object_or_404
 
 
 class SubmitData(APIView):
+    # Фильтрация по email
     def get(self, request):
         email = request.query_params.get('user__email')
+        if not email:
+            return Response({'error': 'Не указан параметр user__email'}, status=400)
+
         perevals = PerevalAdded.objects.filter(user__email=email)
         serializer = PerevalInfoSerializer(perevals, many=True)
         return Response(serializer.data, status=200)
