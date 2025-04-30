@@ -8,6 +8,12 @@ from django.shortcuts import get_object_or_404
 
 
 class SubmitData(APIView):
+    def get(self, request):
+        email = request.query_params.get('user__email')
+        perevals = PerevalAdded.objects.filter(user__email=email)
+        serializer = PerevalInfoSerializer(perevals, many=True)
+        return Response(serializer.data, status=200)
+
     def post(self, request):
         serializer = PerevalAddedSerializer(data=request.data)
         if serializer.is_valid():
@@ -59,3 +65,4 @@ class PerevalRetrieveUpdateView(APIView):
             serializer.save()
             return Response({'state': 1}, status=status.HTTP_200_OK)
         return Response({'state': 0, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
