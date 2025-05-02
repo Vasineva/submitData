@@ -74,3 +74,31 @@ class PerevalAPITestCase(TestCase):
         response = self.client.get('/api/submitData/', {'user__email': self.user.email})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 1)
+
+    def test_patch_pereval(self):
+        # Создаем объект
+        response = self.client.post('/api/submitData/', self.valid_data, format='json')
+        pereval_id = response.data['id']
+
+        # PATCH редактирование данных
+        patch_data = {
+            "title": "Обновлённый перевал",
+            "coords": {
+                "latitude": 46.000,
+                "longitude": 76.000,
+                "height": 1300
+            },
+            "images": [
+                {"title": "Новый вид", "image_url": "http://example.com/new_image.jpg"}
+            ]
+        }
+
+        patch_response = self.client.patch(f'/api/submitData/{pereval_id}/', patch_data, format='json')
+        self.assertEqual(patch_response.status_code, status.HTTP_200_OK)
+
+        # Проверка обновлений
+        updated = self.client.get(f'/api/submitData/{pereval_id}/')
+        self.assertEqual(updated.data['title'], patch_data['title'])
+        self.assertEqual(updated.data['coords']['height'], patch_data['coords']['height'])
+        self.assertEqual(len(updated.data['images']), 1)
+        self.assertEqual(updated.data['images'][0]['title'], "Новый вид")
