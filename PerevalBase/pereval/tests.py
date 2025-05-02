@@ -1,6 +1,6 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
-from .models import *
+from .models import PerevalUser, PerevalAdded
 from rest_framework import status
 
 
@@ -67,7 +67,7 @@ class PerevalAPITestCase(TestCase):
         self.assertEqual(get_response.data['user']['email'], self.valid_data['user']['email'])
 
     def test_get_by_email(self):
-        # Сначала создаём объект
+        # Создаём объект
         self.client.post('/api/submitData/', self.valid_data, format='json')
 
         # GET по email
@@ -118,3 +118,15 @@ class PerevalAPITestCase(TestCase):
         self.assertEqual(patch_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('state', patch_response.data)
         self.assertEqual(patch_response.data['state'], 0)
+
+    def test_post_with_multiple_images(self):
+        # Тест: добавление перевала с несколькими изображениями
+        response = self.client.post('/api/submitData/', self.valid_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        pereval_id = response.data['id']
+
+        get_response = self.client.get(f'/api/submitData/{pereval_id}/')
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(get_response.data['images']), 2)
+        self.assertEqual(get_response.data['images'][0]['title'], "Седловина")
+        self.assertEqual(get_response.data['images'][1]['title'], "Подъем")

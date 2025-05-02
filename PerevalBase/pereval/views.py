@@ -1,3 +1,19 @@
+"""
+Представления реализуют REST API для добавления, получения и редактирования перевалов
+с использованием APIView и документации через drf_yasg.
+
+Классы:
+
+- SubmitData:
+    - GET: Возвращает список перевалов по email (`user__email`). Если не указан — ошибка 400.
+    - POST: Добавляет новый перевал с вложенными данными (user, coords, images).
+      При успехе — статус 201 и id. Обработка — через `handle_valid_data` / `handle_invalid_data`.
+
+- PerevalRetrieveUpdateView:
+    - GET: Возвращает данные перевала по ID. При успехе — статус 200, иначе 404.
+    - PATCH: Обновляет перевал по ID, если статус = "new". Обновляются поля, координаты, изображения.
+      При успехе — `state: 1`, иначе — `state: 0`.
+"""
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
