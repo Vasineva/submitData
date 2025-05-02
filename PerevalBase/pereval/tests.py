@@ -102,3 +102,19 @@ class PerevalAPITestCase(TestCase):
         self.assertEqual(updated.data['coords']['height'], patch_data['coords']['height'])
         self.assertEqual(len(updated.data['images']), 1)
         self.assertEqual(updated.data['images'][0]['title'], "Новый вид")
+
+    def test_patch_disallowed_if_status_not_new(self):
+        # Создаём объект
+        response = self.client.post('/api/submitData/', self.valid_data, format='json')
+        pereval_id = response.data['id']
+
+        # Принудительно меняем статус на "accepted"
+        pereval = PerevalAdded.objects.get(id=pereval_id)
+        pereval.status = 'accepted'
+        pereval.save()
+
+        # Пытаемся отправить PATCH
+        patch_response = self.client.patch(f'/api/submitData/{pereval_id}/', {"title": "Новое название"}, format='json')
+        self.assertEqual(patch_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('state', patch_response.data)
+        self.assertEqual(patch_response.data['state'], 0)
