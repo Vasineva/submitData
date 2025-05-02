@@ -66,4 +66,11 @@ class PerevalAPITestCase(TestCase):
         self.assertEqual(get_response.data['title'], self.valid_data['title'])
         self.assertEqual(get_response.data['user']['email'], self.valid_data['user']['email'])
 
+    def test_get_by_email(self):
+        # Сначала создаём объект
+        self.client.post('/api/submitData/', self.valid_data, format='json')
 
+        # GET по email
+        response = self.client.get('/api/submitData/', {'user__email': self.user.email})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 1)
