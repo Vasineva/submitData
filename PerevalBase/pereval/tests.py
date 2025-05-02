@@ -1,6 +1,7 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 from .models import *
+from rest_framework import status
 
 
 class PerevalAPITestCase(TestCase):
@@ -45,5 +46,24 @@ class PerevalAPITestCase(TestCase):
                 {"title": "Подъем", "image_url": "http://example.com/image2.jpg"}
             ]
         }
+
+    def test_create_and_get_pereval(self):
+        # POST запрос для создания перевала с новым пользователем
+        response = self.client.post('/api/submitData/', self.valid_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['status'], 200)  # Выводим статус 200, если создано успешно
+        pereval_id = response.data['id']
+
+        # Проверка, что новый пользователь был добавлен в базу данных
+        user_email = self.valid_data['user']['email']
+        user = PerevalUser.objects.get(email=user_email)
+        self.assertIsNotNone(user)
+
+        # GET запрос по ID
+        get_response = self.client.get(f'/api/submitData/{pereval_id}/')
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(get_response.data['title'], self.valid_data['title'])
+        self.assertEqual(get_response.data['user']['email'], self.valid_data['user']['email'])
 
 
