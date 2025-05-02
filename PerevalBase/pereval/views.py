@@ -25,8 +25,8 @@ class SubmitData(APIView):
         responses={200: PerevalInfoSerializer(many=True)}
     )
 
+    # Получаем перевалы, связанные email
     def get(self, request):
-        # Получаем перевалы, связанные с этим email
         email = request.query_params.get('user__email')
         if not email:
             return Response({'error': 'Не указан параметр user__email'}, status=400)
@@ -49,8 +49,8 @@ class SubmitData(APIView):
         ))}
     )
 
+    # Добавление перевала в БД
     def post(self, request):
-        # Добавление перевала в БД
         serializer = PerevalAddedSerializer(data=request.data)
         if serializer.is_valid():
             return self.handle_valid_data(serializer)
@@ -82,12 +82,34 @@ class SubmitData(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 class PerevalRetrieveUpdateView(APIView):
+    # Описание GET-запроса на получение информации о перевале по ID
+    @swagger_auto_schema(
+        operation_description="Получить подробную информацию о перевале по ID",
+        responses={200: PerevalInfoSerializer()}
+    )
+
+    # Получение информации о перевале по ID
     def get(self, request, id):
         pereval = get_object_or_404(PerevalAdded, id=id)
         serializer = PerevalInfoSerializer(pereval)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    # Описание PATCH-запроса на частичное обновление перевала
+    @swagger_auto_schema(
+        operation_description="Обновить перевал по ID (если статус = 'new')",
+        request_body=PerevalUpdateSerializer,
+        responses={
+            200: openapi.Response(description="Успешное обновление", schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={'state': openapi.Schema(type=openapi.TYPE_INTEGER)}
+            )),
+            400: "Ошибка валидации или статус не 'new'"
+        }
+    )
+
+    # Обновление перевала
     def patch(self, request, id):
+        # Получаем объект перевала по ID
         pereval = get_object_or_404(PerevalAdded, id=id)
 
         if pereval.status != 'new':
@@ -96,9 +118,11 @@ class PerevalRetrieveUpdateView(APIView):
                 'message': 'Запись не может быть отредактирована, так как ее статус не "new".'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        # Проводим частичное обновление
         serializer = PerevalUpdateSerializer(pereval, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'state': 1}, status=status.HTTP_200_OK)
+        # В случае ошибок валидации
         return Response({'state': 0, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
