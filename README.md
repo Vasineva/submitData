@@ -53,14 +53,7 @@ cd PerevalBase
 pip install -r requirements.txt
 ```
 
-4. создайте файл `.env` в корне проекта `PerevalBase/`:
-    
-- Перейдите в папку PerevalBase
-```bash
-cd PerevalBase
-```
-
-- Заполните его следующими данными:
+4. Создайте файл .env в корневой директории проекта PerevalBase/ (на одном уровне с settings.py) и заполните его следующими данными:
 ```ini
 FSTR_DB_NAME=your_db_name  # имя БД
 FSTR_DB_LOGIN=your_db_user  # имя пользователя
